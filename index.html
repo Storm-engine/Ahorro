@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Ahorro Profesional</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for a clean, professional look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Apply Inter font to the body and set a light gray background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top to prevent layout shifts */
+            min-height: 100vh; /* Ensure it takes full viewport height */
+            padding: 2rem 1rem; /* Add some padding around the container */
+        }
+        /* Main container styling for the app */
+        .container {
+            max-width: 800px; /* Max width for readability */
+            width: 100%; /* Full width on smaller screens */
+            background-color: #ffffff; /* White background for content */
+            border-radius: 1rem; /* Rounded corners for a modern look */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+            padding: 2rem; /* Inner padding */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        /* Smooth transition for the progress bar fill */
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+        /* Gradient text for headings for a "professional" feel */
+        .text-gradient-blue-purple {
+            background-image: linear-gradient(to right, #6366f1, #a855f7); /* Blue to purple gradient */
+            -webkit-background-clip: text; /* Clip background to text shape */
+            -webkit-text-fill-color: transparent; /* Make text transparent to show gradient */
+        }
+        /* Primary button styling with gradient and hover effects */
+        .btn-primary {
+            background-image: linear-gradient(to right, #6366f1, #a855f7);
+            transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Larger shadow on hover */
+        }
+        /* Input field basic styling */
+        .input-field {
+            border: 1px solid #d1d5db; /* Light gray border */
+            border-radius: 0.5rem; /* Rounded corners */
+            padding: 0.75rem 1rem; /* Padding inside the input */
+            width: 100%; /* Full width */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        /* Custom modal styling (instead of alert/confirm) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top of everything */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if content is too large */
+            background-color: rgba(0,0,0,0.4); /* Black background with transparency */
+            justify-content: center; /* Center content horizontally */
+            align-items: center; /* Center content vertically */
+        }
+        .modal-content {
+            background-color: #fefefe; /* White background */
+            margin: auto; /* Center horizontally */
+            padding: 20px;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Shadow for depth */
+            width: 80%; /* 80% width */
+            max-width: 400px; /* Max width for larger screens */
+            text-align: center; /* Center text */
+        }
+        .close-button {
+            color: #aaa; /* Light gray color */
+            float: right; /* Position to the right */
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black; /* Darker on hover/focus */
+            text-decoration: none;
+            cursor: pointer; /* Pointer cursor */
+        }
+        /* Styling for the delete button in history */
+        .delete-btn {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px; /* Full rounded */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .delete-btn:hover {
+            background-color: rgba(239, 68, 68, 0.1); /* Light red background on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center mb-8 text-gradient-blue-purple">Mi Ahorro</h1>
+
+        <!-- Goal Section: Displays the overall savings goal and timeline -->
+        <div class="bg-gray-50 p-6 rounded-lg mb-6 shadow-sm">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Mi Plan de ahorros</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                <div>
+                    <p class="font-medium">Meta Total:</p>
+                    <p class="text-xl font-bold text-blue-600" id="goalAmountDisplay">COP 4,000,000</p>
+                </div>
+                <div>
+                    <p class="font-medium">Plazo:</p>
+                    <p class="text-xl font-bold text-purple-600" id="goalDurationDisplay">6 meses</p>
+                </div>
+                <div>
+                    <p class="font-medium">Fecha de Inicio:</p>
+                    <p class="text-lg" id="startDateDisplay"></p>
+                </div>
+                <div>
+                    <p class="font-medium">Fecha Límite:</p>
+                    <p class="text-lg" id="targetDateDisplay"></p>
+                </div>
+                <div>
+                    <p class="font-medium">Ahorro Diario Necesario:</p>
+                    <p class="text-xl font-bold text-green-600" id="dailyTargetDisplay"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Progress Section: Shows how much has been saved and remaining details -->
+        <div class="bg-blue-50 p-6 rounded-lg mb-6 shadow-sm">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Progreso Actual</h2>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-lg font-medium text-gray-700">Ahorrado: <span class="font-bold text-blue-700" id="currentSavingsDisplay">COP 0</span></span>
+                <span class="text-lg font-medium text-gray-700" id="progressPercentage">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div class="flex justify-between items-center mt-4 text-gray-700">
+                <span class="text-md">Faltan: <span class="font-semibold text-red-600" id="remainingAmountDisplay">COP 4,000,000</span></span>
+                <span class="text-md">Días Restantes: <span class="font-semibold text-orange-600" id="daysRemainingDisplay">182</span></span>
+            </div>
+        </div>
+
+        <!-- Add Daily Savings Section: Input field and button to add new savings -->
+        <div class="bg-green-50 p-6 rounded-lg mb-6 shadow-sm">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Añadir Ahorro Diario</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="number" id="dailySavingInput" placeholder="Cantidad ahorrada hoy" class="input-field flex-grow" min="0" step="0.01">
+                <button id="addSavingBtn" class="btn-primary text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Añadir Ahorro
+                </button>
+            </div>
+        </div>
+
+        <!-- Savings History Section: Lists all recorded savings entries -->
+        <div class="bg-purple-50 p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Historial de Ahorros</h2>
+            <ul id="savingsHistoryList" class="space-y-3">
+                <!-- Savings entries will be dynamically added here by JavaScript -->
+                <li class="text-gray-600 text-center" id="noHistoryMessage">No hay ahorros registrados aún.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Messages: Replaces browser's alert() and confirm() -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <p id="modalMessage" class="text-lg font-semibold text-gray-800"></p>
+            <div class="flex justify-center mt-4">
+                <button id="modalOkBtn" class="btn-primary text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg">OK</button>
+                <button id="modalCancelBtn" class="ml-2 bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-gray-400 hidden">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for the app state
+        const GOAL_AMOUNT = 4000000; // Target savings amount in COP
+        const GOAL_MONTHS = 6;       // Duration of the savings goal in months
+        let startDate = new Date();  // Date when the user first starts using the app, or loaded from storage
+        let savingsHistory = [];     // Array to store daily savings entries: [{ date: 'YYYY-MM-DD', amount: number }]
+
+        // Get references to DOM elements
+        const goalAmountDisplay = document.getElementById('goalAmountDisplay');
+        const goalDurationDisplay = document.getElementById('goalDurationDisplay');
+        const startDateDisplay = document.getElementById('startDateDisplay');
+        const targetDateDisplay = document.getElementById('targetDateDisplay');
+        const dailyTargetDisplay = document.getElementById('dailyTargetDisplay');
+        const currentSavingsDisplay = document.getElementById('currentSavingsDisplay');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const progressBarFill = document.querySelector('.progress-bar-fill');
+        const remainingAmountDisplay = document.getElementById('remainingAmountDisplay');
+        const daysRemainingDisplay = document.getElementById('daysRemainingDisplay');
+        const dailySavingInput = document.getElementById('dailySavingInput');
+        const addSavingBtn = document.getElementById('addSavingBtn');
+        const savingsHistoryList = document.getElementById('savingsHistoryList');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+
+        // Get references to modal elements
+        const messageModal = document.getElementById('messageModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalOkBtn = document.getElementById('modalOkBtn');
+        const modalCancelBtn = document.getElementById('modalCancelBtn'); // Reference to the new cancel button
+
+        /**
+         * Displays a custom modal message to the user, optionally with confirmation.
+         * This replaces the standard browser alert() and confirm() functions for a better UX.
+         * @param {string} message The message text to display in the modal.
+         * @param {boolean} isConfirm If true, shows "Confirmar" and "Cancelar" buttons and requires confirmation.
+         * @param {function} onConfirm Callback function to execute if confirmed.
+         */
+        function showModalMessage(message, isConfirm = false, onConfirm = null) {
+            modalMessage.textContent = message; // Set the message text
+            modalOkBtn.textContent = isConfirm ? 'Confirmar' : 'OK'; // Change OK button text based on confirmation mode
+
+            if (isConfirm) {
+                modalCancelBtn.style.display = 'inline-block'; // Show cancel button
+                modalOkBtn.onclick = () => { // Set click handler for confirmation
+                    if (onConfirm) onConfirm();
+                    hideModalMessage();
+                };
+            } else {
+                modalCancelBtn.style.display = 'none'; // Hide cancel button
+                modalOkBtn.onclick = hideModalMessage; // Set click handler to just close modal
+            }
+
+            messageModal.style.display = 'flex'; // Show the modal using flexbox for centering
+        }
+
+        /**
+         * Hides the custom modal message.
+         */
+        function hideModalMessage() {
+            messageModal.style.display = 'none'; // Hide the modal
+        }
+
+        /**
+         * Formats a given number as Colombian Pesos (COP) currency.
+         * @param {number} amount The numeric value to format.
+         * @returns {string} The formatted currency string (e.g., "COP 1,234,567").
+         */
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0, // COP typically doesn't use decimals
+                maximumFractionDigits: 0,
+            }).format(amount);
+        }
+
+        /**
+         * Formats a Date object into a localized string (e.g., "DD/MM/YYYY").
+         * @param {Date} date The Date object to format.
+         * @returns {string} The formatted date string.
+         */
+        function formatDate(date) {
+            return date.toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+        }
+
+        /**
+         * Calculates various progress metrics for the savings goal.
+         * @returns {object} An object containing calculated metrics like total saved, remaining amounts, dates, etc.
+         */
+        function calculateProgress() {
+            // Calculate total amount saved so far
+            let totalSaved = savingsHistory.reduce((sum, entry) => sum + entry.amount, 0);
+
+            // Calculate the target end date for the goal
+            const targetDate = new Date(startDate);
+            targetDate.setMonth(targetDate.getMonth() + GOAL_MONTHS);
+            targetDate.setHours(0, 0, 0, 0); // Normalize to the beginning of the day
+
+            // Get today's date, normalized to the beginning of the day
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Calculate the total number of days in the savings period
+            const totalDays = Math.ceil((targetDate - startDate) / (1000 * 60 * 60 * 24));
+            // Calculate remaining days, ensuring it's not negative
+            const daysRemaining = Math.max(0, Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24)));
+
+            // Calculate the amount remaining to reach the goal, ensuring it's not negative
+            const remainingAmount = Math.max(0, GOAL_AMOUNT - totalSaved);
+            // Calculate the percentage of the goal achieved
+            const progressPercent = (totalSaved / GOAL_AMOUNT) * 100;
+            // Calculate the approximate daily savings needed to reach the goal on time
+            const dailyTarget = GOAL_AMOUNT / totalDays;
+
+            return {
+                totalSaved,
+                targetDate,
+                totalDays,
+                daysRemaining,
+                remainingAmount,
+                progressPercent,
+                dailyTarget
+            };
+        }
+
+        /**
+         * Renders (or re-renders) all dynamic UI elements based on the current app state.
+         */
+        function renderUI() {
+            // Get the latest progress calculations
+            const { totalSaved, targetDate, totalDays, daysRemaining, remainingAmount, progressPercent, dailyTarget } = calculateProgress();
+
+            // Update Goal Section displays
+            goalAmountDisplay.textContent = formatCurrency(GOAL_AMOUNT);
+            goalDurationDisplay.textContent = `${GOAL_MONTHS} meses`;
+            startDateDisplay.textContent = formatDate(startDate);
+            targetDateDisplay.textContent = formatDate(targetDate);
+            dailyTargetDisplay.textContent = formatCurrency(dailyTarget) + " (aprox.)";
+
+            // Update Current Progress Section displays
+            currentSavingsDisplay.textContent = formatCurrency(totalSaved);
+            progressPercentage.textContent = `${Math.min(100, progressPercent).toFixed(2)}%`; // Cap at 100%
+            progressBarFill.style.width = `${Math.min(100, progressPercent)}%`; // Cap at 100% for visual width
+            remainingAmountDisplay.textContent = formatCurrency(remainingAmount);
+            daysRemainingDisplay.textContent = `${daysRemaining} días`;
+
+            // Update Savings History List
+            savingsHistoryList.innerHTML = ''; // Clear existing list items
+            if (savingsHistory.length === 0) {
+                noHistoryMessage.style.display = 'block'; // Show "No history" message if list is empty
+            } else {
+                noHistoryMessage.style.display = 'none'; // Hide "No history" message
+                // Sort history by date in descending order (most recent first)
+                const sortedHistory = [...savingsHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+                sortedHistory.forEach(entry => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'flex justify-between items-center p-3 bg-white rounded-md shadow-sm';
+                    listItem.innerHTML = `
+                        <span class="font-medium text-gray-700">${formatDate(new Date(entry.date))}</span>
+                        <span class="font-bold text-green-600">${formatCurrency(entry.amount)}</span>
+                        <button class="delete-btn text-red-500 hover:text-red-700 font-bold py-1 px-2 rounded-full" data-date="${entry.date}">
+                            &times;
+                        </button>
+                    `;
+                    savingsHistoryList.appendChild(listItem);
+                });
+            }
+        }
+
+        /**
+         * Saves the current application data (startDate and savingsHistory) to localStorage.
+         * This ensures data persistence across browser sessions.
+         */
+        function saveData() {
+            const dataToSave = {
+                startDate: startDate.toISOString(), // Convert Date object to ISO string for storage
+                savingsHistory: savingsHistory,
+                // GOAL_AMOUNT and GOAL_MONTHS are constants, so they don't need to be saved
+            };
+            localStorage.setItem('savingsApp_data', JSON.stringify(dataToSave)); // Store as a JSON string
+        }
+
+        /**
+         * Loads application data from localStorage.
+         * If no data is found, it initializes startDate to the current date.
+         */
+        function loadData() {
+            const savedData = localStorage.getItem('savingsApp_data');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                startDate = new Date(parsedData.startDate); // Parse ISO string back to Date object
+                savingsHistory = parsedData.savingsHistory || []; // Ensure savingsHistory is an array
+            } else {
+                // If no data exists (first time running the app), set startDate to today
+                startDate = new Date();
+                startDate.setHours(0, 0, 0, 0); // Normalize to start of day
+                saveData(); // Save this initial state
+            }
+        }
+
+        /**
+         * Handles adding a new daily saving entry.
+         * Validates input, updates history, saves data, and re-renders the UI.
+         */
+        function addDailySaving() {
+            const amount = parseFloat(dailySavingInput.value);
+
+            // Input validation
+            if (isNaN(amount) || amount <= 0) {
+                showModalMessage('Por favor, introduce una cantidad válida y positiva.');
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day for consistent date comparison
+            const todayDateString = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
+            // Check if an entry for today already exists
+            const existingEntryIndex = savingsHistory.findIndex(entry => entry.date === todayDateString);
+
+            if (existingEntryIndex !== -1) {
+                // If an entry exists for today, update its amount by adding the new amount
+                savingsHistory[existingEntryIndex].amount += amount;
+                showModalMessage(`Se ha actualizado el ahorro de hoy a ${formatCurrency(savingsHistory[existingEntryIndex].amount)}.`);
+            } else {
+                // If no entry for today, add a new one
+                savingsHistory.push({ date: todayDateString, amount: amount });
+                showModalMessage(`¡Ahorro de ${formatCurrency(amount)} añadido con éxito!`);
+            }
+
+            dailySavingInput.value = ''; // Clear the input field after adding
+            saveData(); // Persist the updated data to localStorage
+            renderUI(); // Update the user interface to reflect changes
+        }
+
+        /**
+         * Deletes a specific saving entry from the history based on its date.
+         * @param {string} dateString The date of the entry to delete (YYYY-MM-DD).
+         */
+        function deleteSavingEntry(dateString) {
+            // Filter out the entry with the matching date
+            savingsHistory = savingsHistory.filter(entry => entry.date !== dateString);
+            saveData(); // Save the updated history
+            renderUI(); // Re-render the UI
+            showModalMessage('Ahorro eliminado con éxito.'); // Confirm deletion
+        }
+
+
+        // Event Listeners for user interactions
+        addSavingBtn.addEventListener('click', addDailySaving); // When the "Añadir Ahorro" button is clicked
+        dailySavingInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { // When the Enter key is pressed in the input field
+                addDailySaving();
+            }
+        });
+
+        // Event listener for the delete buttons in the history list (using event delegation)
+        savingsHistoryList.addEventListener('click', function(event) {
+            if (event.target.classList.contains('delete-btn')) {
+                const dateToDelete = event.target.dataset.date;
+                // Show confirmation modal before deleting
+                showModalMessage(`¿Estás seguro de que quieres eliminar el ahorro del ${formatDate(new Date(dateToDelete))}?`, true, () => deleteSavingEntry(dateToDelete));
+            }
+        });
+
+        // Event listeners for the custom modal
+        closeModalBtn.addEventListener('click', hideModalMessage); // Close button in modal
+        modalOkBtn.addEventListener('click', hideModalMessage);     // OK button in modal (default behavior)
+        modalCancelBtn.addEventListener('click', hideModalMessage); // Cancel button in modal
+        window.addEventListener('click', function(event) {
+            if (event.target == messageModal) { // Close modal if clicked outside the content area
+                hideModalMessage();
+            }
+        });
+
+        // Initialize the app when the DOM content is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData(); // Load any previously saved data
+            renderUI(); // Render the UI with the loaded (or initial) data
+        });
+    </script>
+</body>
+</html>
